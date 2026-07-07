@@ -11,18 +11,23 @@ export default function Hero() {
           San Antonio Mobile Detailing
         </p>
 
-        <h1 className="max-w-5xl text-5xl font-black uppercase tracking-tight md:text-7xl">
-          Perry&apos;s Mobile Detailing
+        <h1 className="max-w-6xl text-6xl font-black uppercase leading-none tracking-tight md:text-8xl xl:text-9xl">
+          <>
+  Luxury Results.
+  <br />
+  Right At Your Door.
+</>
         </h1>
 
-        <p className="mt-6 max-w-2xl text-lg leading-8 text-gray-300 md:text-xl">
-          Luxury results. Professional service. Right at your door.
-        </p>
+        <p className="mt-8 text-2xl font-semibold uppercase tracking-[0.25em] text-[#FFD100]">
+  Perry&apos;s Mobile Detailing
+</p>
 
-        <p className="mt-4 max-w-3xl text-gray-400">
-          We bring premium mobile detailing directly to your driveway with
-          organized scheduling, transparent pricing, and trusted service.
-        </p>
+<p className="mt-6 max-w-3xl text-xl leading-9 text-gray-300 md:text-2xl">
+  Our Professional Detailers bring premium automotive detailing directly to
+  your driveway with transparent pricing, organized scheduling, and trusted
+  service.
+</p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
           <Button href="/booking">Book Appointment</Button>
