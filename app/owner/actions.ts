@@ -20,7 +20,7 @@ export async function updateAppointmentStatus(formData: FormData) {
   const status = String(formData.get("status") ?? "");
 
   if (!appointmentId || !allowedStatuses.includes(status)) {
-    throw new Error("Invalid appointment status update.");
+    throw new Error("Invalid appointment status.");
   }
 
   const supabase = await createClient();
