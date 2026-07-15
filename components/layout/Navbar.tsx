@@ -33,48 +33,48 @@ export default function Navbar() {
 </Link>
 
           <Link
-  href="/"
+  href="/#why-choose-us"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Why Us 
 </Link>
 
           <Link
-  href="/"
+  href="/#services"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Services
 </Link>
 
 <Link
-  href="/"
+  href="/#gallery"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Gallery
 </Link>
           <Link
-  href="/"
+  href="/#reviews"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Reviews
 </Link>
 
           <Link
-  href="/"
+  href="/#faq"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   FAQ
 </Link>
 
           <Link
-  href="/"
+  href="/#contact"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Contact
 </Link>
 
           <Link
-  href="/"
+  href="/#careers"
   className="transition-all duration-300 hover:text-[#FFD100] hover:scale-105"
 >
   Careers

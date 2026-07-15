@@ -68,10 +68,15 @@ await createAppointment({
       setTimeout(() => {
         router.push("/booking/confirmation");
       }, 800);
-    } catch (error) {
-      console.error(error);
-      setMessage("Something went wrong saving the appointment.");
-    } finally {
+    } catch (error: unknown) {
+  console.error("Appointment save error:", error);
+
+  if (error instanceof Error) {
+    setMessage(`Save failed: ${error.message}`);
+  } else {
+    setMessage("Save failed: Unknown database error.");
+  }
+} finally {
       setIsSubmitting(false);
     }
   }
