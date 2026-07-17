@@ -54,11 +54,7 @@ const totalRevenue = appointments.reduce(
   (sum, appointment) => sum + Number(appointment.total_price || 0),
   0
 );
-{error && (
-  <div className="mt-8 rounded-2xl border border-red-500/50 bg-red-500/10 p-5 text-red-200">
-    Could not load appointments: {error.message}
-  </div>
-)}
+
 const pendingAppointments = appointments.filter(
   (appointment) => appointment.status.toLowerCase() === "pending"
 ).length;

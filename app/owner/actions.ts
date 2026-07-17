@@ -36,14 +36,20 @@ export async function updateAppointmentStatus(formData: FormData) {
     redirect("/owner/login");
   }
 
-  const { error } = await supabase
-    .from("appointments")
-    .update({ status })
-    .eq("id", appointmentId);
+  const { data: updatedAppointment, error } = await supabase
+  .from("appointments")
+  .update({ status })
+  .eq("id", appointmentId)
+  .select("id, status")
+  .single();
 
-  if (error) {
-    throw new Error(error.message);
-  }
+if (error) {
+  throw new Error(`Status update failed: ${error.message}`);
+}
+
+if (!updatedAppointment) {
+  throw new Error("No appointment was updated.");
+}
 
   revalidatePath("/owner");
 }

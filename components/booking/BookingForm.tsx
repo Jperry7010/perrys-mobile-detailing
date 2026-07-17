@@ -1,7 +1,6 @@
 "use client";
 import BookingSummary from "./BookingSummary";
-import { useMemo, useState } from "react";
-import Button from "../ui/Button";
+import { useMemo, useState } from "react"
 import { useBooking } from "./context/BookingContext";
 const services = [
   {
@@ -73,7 +72,14 @@ export default function BookingForm() {
   function previousStep() {
     setStep((current) => Math.max(current - 1, 1));
   }
-
+function vehicleInformationComplete() {
+  return (
+    vehicle.year.trim() !== "" &&
+    vehicle.make.trim() !== "" &&
+    vehicle.model.trim() !== "" &&
+    vehicle.type.trim() !== ""
+  );
+}
   return (
     <section className="mx-auto max-w-6xl px-6 py-20">
       <p className="text-sm font-black uppercase tracking-[0.4em] text-[#FFD100]">
@@ -240,8 +246,11 @@ export default function BookingForm() {
             </button>
           ) : (
             <button
+  type="button"
+  disabled={!vehicleInformationComplete()}
   onClick={() => {
     const selectedService = services.find((item) => item.id === service);
+
     const selectedAddOnObjects = addOns.filter((addOn) =>
       selectedAddOns.includes(addOn.id)
     );
@@ -262,7 +271,7 @@ export default function BookingForm() {
 
     window.location.href = "/booking/details";
   }}
-  className="rounded-full bg-[#FFD100] px-8 py-4 font-bold uppercase text-black"
+  className="rounded-full bg-[#FFD100] px-8 py-4 font-bold uppercase text-black disabled:cursor-not-allowed disabled:opacity-40"
 >
   Continue Booking
 </button>
