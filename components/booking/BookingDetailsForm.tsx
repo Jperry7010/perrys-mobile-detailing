@@ -48,6 +48,7 @@ export default function BookingDetailsForm() {
     year: String(new Date().getFullYear()),
     time: "",
     notes: "",
+    smsConsent: false,
   });
 
   const availableTimes = useMemo(() => {
@@ -92,7 +93,39 @@ export default function BookingDetailsForm() {
       form.time !== ""
     );
   }
+async function sendConfirmationEmail(
+  savedBooking: Record<string, unknown>,
+  appointmentMonth: string,
+  appointmentDay: string
+) {
+  const response = await fetch("/api/send-confirmation", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email: form.email.trim(),
+      firstName: form.firstName.trim(),
+      lastName: form.lastName.trim(),
+      serviceName: String(savedBooking.service_name ?? ""),
+      appointmentMonth,
+      appointmentDay,
+      appointmentYear: Number(form.year),
+      appointmentTime: form.time,
+      address: form.address.trim(),
+      city: form.city.trim(),
+      zip: form.zip.trim(),
+    }),
+  });
 
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(
+      result.error || "The confirmation email could not be sent."
+    );
+  }
+}
   async function handleSaveAppointment() {
     if (!requiredInformationComplete()) {
       setMessage("Please complete every required field before continuing.");
@@ -114,6 +147,7 @@ export default function BookingDetailsForm() {
         last_name: form.lastName.trim(),
         email: form.email.trim(),
         phone: form.phone.trim(),
+        sms_consent: form.smsConsent,
         address: form.address.trim(),
         city: form.city.trim(),
         zip: form.zip.trim(),
@@ -131,7 +165,11 @@ export default function BookingDetailsForm() {
         vehicle_type: savedBooking.vehicle_type,
         total_price: savedBooking.total_price,
       });
-
+await sendConfirmationEmail(
+  savedBooking,
+  appointment_month,
+  appointment_day
+);
       setMessage("Appointment saved successfully.");
 
       setTimeout(() => {
@@ -205,7 +243,7 @@ export default function BookingDetailsForm() {
                     ? "tel"
                     : "text"
               }
-              value={form[field as keyof typeof form]}
+              value={form[field as keyof typeof form] as string}
               onChange={(event) => updateField(field, event.target.value)}
               className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 text-white outline-none focus:border-[#FFD100]"
             />
@@ -216,7 +254,6 @@ export default function BookingDetailsForm() {
           <span className="font-bold uppercase text-gray-300">
             Appointment Year <span className="text-[#FFD100]">*</span>
           </span>
-
           <select
             required
             value={form.year}
@@ -346,6 +383,37 @@ export default function BookingDetailsForm() {
             className="mt-2 min-h-32 w-full rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-4 text-white outline-none focus:border-[#FFD100]"
           />
         </label>
+        <label className="block md:col-span-2">
+  <span className="font-bold uppercase text-gray-300">
+    Appointment Notifications
+  </span>
+
+  <div className="mt-3 flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+    <input
+      type="checkbox"
+      checked={form.smsConsent}
+      onChange={(event) =>
+        setForm((current) => ({
+          ...current,
+          smsConsent: event.target.checked,
+        }))
+      }
+      className="mt-1 h-5 w-5 accent-[#FFD100]"
+    />
+
+    <div>
+      <p className="font-semibold text-white">
+        Receive text appointment reminders
+      </p>
+
+      <p className="mt-1 text-sm text-gray-400">
+        You'll automatically receive an email confirmation after booking.
+        Check this box if you'd also like text reminders before your appointment.
+        Message and data rates may apply. Reply STOP to opt out.
+      </p>
+    </div>
+  </div>
+</label>
       </div>
 
       <div className="mt-10 rounded-3xl border border-[#FFD100]/40 bg-[#FFD100]/10 p-6">
