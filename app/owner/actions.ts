@@ -27,9 +27,11 @@ export async function updateAppointmentStatus(formData: FormData) {
 
   const {
     data: { user },
+    error: authError,
   } = await supabase.auth.getUser();
 
   if (
+    authError ||
     !user ||
     user.email?.toLowerCase() !== process.env.OWNER_EMAIL?.toLowerCase()
   ) {
@@ -37,19 +39,19 @@ export async function updateAppointmentStatus(formData: FormData) {
   }
 
   const { data: updatedAppointment, error } = await supabase
-  .from("appointments")
-  .update({ status })
-  .eq("id", appointmentId)
-  .select("id, status")
-  .single();
+    .from("appointments")
+    .update({ status })
+    .eq("id", appointmentId)
+    .select("id, status")
+    .single();
 
-if (error) {
-  throw new Error(`Status update failed: ${error.message}`);
-}
+  if (error) {
+    throw new Error(`Status update failed: ${error.message}`);
+  }
 
-if (!updatedAppointment) {
-  throw new Error("No appointment was updated.");
-}
+  if (!updatedAppointment) {
+    throw new Error("No appointment was updated.");
+  }
 
-  revalidatePath("/owner");
+  revalidatePath("/admin");
 }

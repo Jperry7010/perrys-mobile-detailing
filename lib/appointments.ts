@@ -44,3 +44,28 @@ export async function createAppointment(
     throw new Error(error.message);
   }
 }
+export async function getBookedAppointmentTimes(
+  appointmentMonth: string,
+  appointmentDay: string,
+  appointmentYear: number
+): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("appointments")
+    .select("appointment_time, status")
+    .eq("appointment_month", appointmentMonth)
+    .eq("appointment_day", appointmentDay)
+    .eq("appointment_year", appointmentYear);
+
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? [])
+    .filter((appointment) => {
+      const status = String(appointment.status ?? "").toLowerCase();
+
+      return status !== "cancelled" && status !== "canceled";
+    })
+    .map((appointment) => appointment.appointment_time)
+    .filter((time): time is string => Boolean(time));
+}

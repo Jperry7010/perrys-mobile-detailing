@@ -1,9 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
-import { createAppointment } from "../../lib/appointments";
-
+import { useEffect, useMemo, useState } from "react";
+import {
+  createAppointment,
+  getBookedAppointmentTimes,
+} from "../../lib/appointments";
 const months = [
   "January",
   "February",
@@ -35,7 +37,8 @@ export default function BookingDetailsForm() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState("");
-
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [isLoadingTimes, setIsLoadingTimes] = useState(false);
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -51,23 +54,77 @@ export default function BookingDetailsForm() {
     smsConsent: false,
   });
 
-  const availableTimes = useMemo(() => {
-    const [monthName, dayValue] = form.date.split("-");
-    const monthIndex = months.indexOf(monthName);
-    const day = Number(dayValue);
-    const year = Number(form.year);
+    const baseAvailableTimes = useMemo(() => {
+  const [monthName, dayValue] = form.date.split("-");
+  const monthIndex = months.indexOf(monthName);
+  const day = Number(dayValue);
+  const year = Number(form.year);
 
-    if (monthIndex === -1 || !day || !year) {
-      return [];
+  if (monthIndex === -1 || !day || !year) {
+    return [];
+  }
+
+  const selectedDate = new Date(year, monthIndex, day);
+
+  const isWeekend =
+    selectedDate.getDay() === 0 || selectedDate.getDay() === 6;
+
+  return isWeekend ? weekendTimes : weekdayTimes;
+}, [form.date, form.year]);
+
+useEffect(() => {
+  const [appointmentMonth, appointmentDay] = form.date.split("-");
+  const appointmentYear = Number(form.year);
+
+  if (!appointmentMonth || !appointmentDay || !appointmentYear) {
+    setBookedTimes([]);
+    setIsLoadingTimes(false);
+    return;
+  }
+
+  let requestIsActive = true;
+
+  async function loadBookedTimes() {
+    try {
+      setIsLoadingTimes(true);
+
+      const times = await getBookedAppointmentTimes(
+        appointmentMonth,
+        appointmentDay,
+        appointmentYear
+      );
+
+      if (requestIsActive) {
+        setBookedTimes(times);
+      }
+    } catch (error) {
+      console.error("Could not load booked appointment times:", error);
+
+      if (requestIsActive) {
+        setBookedTimes([]);
+        setMessage(
+          "We could not check appointment availability. Please try again."
+        );
+      }
+    } finally {
+      if (requestIsActive) {
+        setIsLoadingTimes(false);
+      }
     }
+  }
 
-    const selectedDate = new Date(year, monthIndex, day);
+  loadBookedTimes();
 
-    const isWeekend =
-      selectedDate.getDay() === 0 || selectedDate.getDay() === 6;
+  return () => {
+    requestIsActive = false;
+  };
+}, [form.date, form.year]);
 
-    return isWeekend ? weekendTimes : weekdayTimes;
-  }, [form.date, form.year]);
+const availableTimes = useMemo(() => {
+  return baseAvailableTimes.filter(
+    (time) => !bookedTimes.includes(time)
+  );
+}, [baseAvailableTimes, bookedTimes]);
 
   function updateField(field: string, value: string) {
     setForm((current) => ({
@@ -355,14 +412,18 @@ await sendConfirmationEmail(
             required
             value={form.time}
             onChange={(event) => updateField("time", event.target.value)}
-            disabled={availableTimes.length === 0}
-            className="mt-2 w-full rounded-2xl border border-white/10 bg-black px-5 py-4 text-white outline-none focus:border-[#FFD100] disabled:cursor-not-allowed disabled:opacity-50"
+disabled={isLoadingTimes || availableTimes.length === 0}
+className="mt-2 w-full rounded-2xl border border-white/10 bg-black px-5 py-4 text-white outline-none focus:border-[#FFD100] disabled:cursor-not-allowed disabled:opacity-50" 
           >
             <option value="" className="bg-white text-black">
-              {availableTimes.length
-                ? "Select a time"
-                : "Choose a date first"}
-            </option>
+  {isLoadingTimes
+    ? "Checking availability..."
+    : !form.date.split("-")[0] || !form.date.split("-")[1]
+      ? "Choose a date first"
+      : availableTimes.length > 0
+        ? "Select a time"
+        : "No times available"}
+</option>
 
             {availableTimes.map((time) => (
               <option key={time} value={time} className="bg-white text-black">
